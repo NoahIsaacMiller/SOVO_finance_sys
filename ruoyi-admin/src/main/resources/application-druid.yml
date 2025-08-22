@@ -59,3 +59,15 @@ spring:
                 wall:
                     config:
                         multi-statement-allow: true
+
+    jpa: # 数据库平台（根据实际数据库选择，如MySQL、PostgreSQL）
+#            database-platform: org.hibernate.dialect.MySQL8Dialect
+            hibernate:
+                # 自动建表策略：update（常用）
+                ddl-auto: update
+            # 显示SQL语句（开发环境建议开启，方便调试）
+            show-sql: true
+            properties:
+                hibernate:
+                    # 格式化SQL输出
+                    format_sql: true

@@ -11,54 +11,100 @@
     <packaging>jar</packaging>
     <artifactId>ruoyi-admin</artifactId>
 
-    <description>
-        web服务入口
-    </description>
+    <description>web服务入口</description>
+
+    <properties>
+        <!-- 明确指定Java版本，避免版本冲突 -->
+        <java.version>1.8</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- MapStruct 依赖 -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>1.5.5.Final</version>
+        </dependency>
 
         <!-- spring-boot-devtools -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
-            <optional>true</optional> <!-- 表示依赖不会传递 -->
+            <optional>true</optional>
         </dependency>
 
-        <!-- swagger3-->
+        <!-- Swagger3 -->
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-boot-starter</artifactId>
         </dependency>
 
-        <!-- 防止进入swagger页面报类型转换错误，排除3.0.0中的引用，手动增加1.6.2版本 -->
+        <!-- 解决Swagger类型转换问题 -->
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-models</artifactId>
             <version>1.6.2</version>
         </dependency>
 
-         <!-- Mysql驱动包 -->
+        <!-- Mysql驱动包 -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
 
-        <!-- 核心模块-->
+        <!-- 核心模块 -->
         <dependency>
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-framework</artifactId>
         </dependency>
 
-        <!-- 定时任务-->
+        <!-- 定时任务 -->
         <dependency>
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-quartz</artifactId>
         </dependency>
 
-        <!-- 代码生成-->
+        <!-- 代码生成 -->
         <dependency>
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-generator</artifactId>
+        </dependency>
+
+        <!-- Spring Data JPA (已包含在starter中，无需重复引入) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.38</version>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- JUnit 5 -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.9.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.9.2</version>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>
@@ -70,7 +116,9 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>2.5.15</version>
                 <configuration>
-                    <fork>true</fork> <!-- 如果没有该配置，devtools不会生效 -->
+                    <fork>true</fork>
+                    <!-- 显式指定主类（如果自动识别有问题） -->
+                    <mainClass>com.ruoyi.RuoYiApplication</mainClass>
                 </configuration>
                 <executions>
                     <execution>
@@ -80,15 +128,44 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>   
-                <groupId>org.apache.maven.plugins</groupId>   
-                <artifactId>maven-war-plugin</artifactId>   
-                <version>3.1.0</version>   
+
+            <!-- 编译插件配置 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <!-- 解决Lombok和MapStruct注解处理器冲突 -->
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.38</version>
+                        </path>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>1.5.5.Final</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+
+            <!-- 打包为war时使用（当前packaging是jar，可注释） -->
+            <!--
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.1.0</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                     <warName>${project.artifactId}</warName>
-                </configuration>   
-           </plugin>   
+                </configuration>
+            </plugin>
+            -->
         </plugins>
         <finalName>${project.artifactId}</finalName>
     </build>
