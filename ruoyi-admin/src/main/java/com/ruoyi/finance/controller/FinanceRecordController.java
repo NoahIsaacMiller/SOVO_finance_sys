@@ -2,12 +2,11 @@ package com.ruoyi.finance.controller;
 
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.enums.BusinessType;
-import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.finance.converter.FinanceRecordMapper;
 import com.ruoyi.finance.dto.FinanceRecordCreateRequest;
 import com.ruoyi.finance.dto.FinanceRecordQueryDto;
 import com.ruoyi.finance.service.FinanceRecordService;
 import com.ruoyi.finance.utils.ApiResponse;
-import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +22,9 @@ public class FinanceRecordController {
 
     @Autowired
     private FinanceRecordService financeRecordService;
+
+    @Autowired
+    private FinanceRecordMapper financeRecordMapper;
 
     /**
      * 动态查询财务记录
@@ -45,5 +47,11 @@ public class FinanceRecordController {
     @PostMapping
     public ApiResponse add(@Valid @RequestBody FinanceRecordCreateRequest createRequest) throws Exception {
        return ApiResponse.success(financeRecordService.create(createRequest));
+    }
+
+    @Log(title = "财务流水管理", businessType = BusinessType.DELETE)
+    @DeleteMapping
+    public ApiResponse delete(@RequestParam(value = "id", required = true) Long id) throws Exception {
+        return ApiResponse.success(financeRecordMapper.toFinanceRecordResponse(financeRecordService.delete(id)));
     }
 }

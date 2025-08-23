@@ -3,12 +3,14 @@ package com.ruoyi.framework.web.exception;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -120,6 +122,25 @@ public class GlobalExceptionHandler
                 e);
 
         return AjaxResult.error(String.format("请求路径中缺少必需的路径变量[%s]", e.getVariableName()));
+    }
+    /**
+     * 请求未携带必要的参数
+     */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public AjaxResult handleMissingServletRequestParameterException(MissingServletRequestParameterException e, HttpServletRequest request)
+    {
+        String requestURI = request.getRequestURI();
+        String method = request.getMethod();
+
+        log.error("[{}] 路径变量缺失 - 请求方法: {}, 请求地址: {}, 缺失变量名: {}, 异常信息: {}",
+                LocalDateTime.now().format(formatter),
+                method,
+                requestURI,
+                e.getParameterName(),
+                e.getMessage(),
+                e);
+
+        return AjaxResult.error(String.format("请求路径中缺少必需的路径变量[%s]", e.getParameterName()));
     }
 
     /**
@@ -237,6 +258,15 @@ public class GlobalExceptionHandler
 
         return AjaxResult.error(StringUtils.join(errorMessages, "; "));
     }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public Object handleHttpMessageNotReadableException(HttpMessageNotReadableException e)
+    {
+        return AjaxResult.error("请求体缺失");
+    }
+
+
+
 
     /**
      * 演示模式异常

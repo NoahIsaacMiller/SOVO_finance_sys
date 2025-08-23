@@ -2,6 +2,7 @@ package com.ruoyi.finance.converter;
 
 import com.ruoyi.finance.dto.FinanceRecordCreateRequest;
 import com.ruoyi.finance.dto.FinanceRecordResponse;
+import com.ruoyi.finance.dto.FinanceRecordUpdateRequest;
 import com.ruoyi.finance.entity.FinanceRecord;
 import org.mapstruct.Mapper;
 
@@ -13,4 +14,5 @@ public interface FinanceRecordMapper {
 
     FinanceRecordResponse toFinanceRecordResponse(FinanceRecord financeRecord);
     FinanceRecord toFinanceRecord(FinanceRecordCreateRequest financeRecordCreateRequest);
+    FinanceRecord toFinanceRecord(FinanceRecordUpdateRequest financeRecordUpdateRequest);
 }

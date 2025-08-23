@@ -4,6 +4,7 @@ import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.finance.dto.FinanceRecordCreateRequest;
 import com.ruoyi.finance.dto.FinanceRecordQueryDto;
 import com.ruoyi.finance.dto.FinanceRecordResponse;
+import com.ruoyi.finance.dto.FinanceRecordUpdateRequest;
 import com.ruoyi.finance.entity.FinanceRecord;
 import com.ruoyi.finance.entity.Subject;
 import com.ruoyi.finance.converter.FinanceRecordMapper;
@@ -44,7 +45,18 @@ public class FinanceRecordService {
     private static final String DEFAULT_SORT_FIELD = "recordDate";
     private static final Sort.Direction DEFAULT_SORT_DIRECTION = Sort.Direction.DESC;
 
-    public FinanceRecordResponse getById(Long recordId, Boolean includeDeleted) throws Exception {
+    public FinanceRecord getById(Long recordId, Boolean includeDeleted) throws Exception {
+        FinanceRecord record = includeDeleted ?
+                financeRecordRepository.findById(recordId).orElse(null) :
+                financeRecordRepository.findByIdAndDeletedFalse(recordId);
+
+        if (record == null) {
+            throw new ServiceException("流水记录id<" + recordId + ">不存在");
+        }
+        return record;
+    }
+
+    public FinanceRecordResponse getFinanceRecordResponseById(Long recordId, Boolean includeDeleted) throws Exception {
         FinanceRecord record = includeDeleted ?
                 financeRecordRepository.findById(recordId).orElse(null) :
                 financeRecordRepository.findByIdAndDeletedFalse(recordId);
@@ -187,5 +199,34 @@ public class FinanceRecordService {
         record.setSubjectId(createRequest.getSubjectId());
         financeRecordRepository.save(record);
         return financeRecordMapper.toFinanceRecordResponse(record);
+    }
+
+    public FinanceRecordResponse update(FinanceRecordUpdateRequest dto) throws Exception {
+        if (dto == null) {
+            throw new ServiceException("dto为null");
+        }
+
+        if (!financeRecordRepository.existsById(dto.getId())) {
+            throw new ServiceException("finance record id不存在");
+        }
+
+        if (!subjectService.existById(dto.getSubjectId())) {
+            throw new ServiceException("subject id不存在");
+        }
+
+        if (dto.getRecordDate().isAfter(LocalDate.now())) {
+            throw new ServiceException("流水时间不能超过当下");
+        }
+        FinanceRecord record = financeRecordMapper.toFinanceRecord(dto);
+        record.setSubject(subjectService.getSubjectById(dto.getSubjectId(), false));
+        record.setSubjectId(dto.getSubjectId());
+        financeRecordRepository.save(record);
+        return financeRecordMapper.toFinanceRecordResponse(record);
+    }
+
+    public FinanceRecord delete(Long id) throws Exception {
+        FinanceRecord record = getById(id, false);
+        record.setDeleted(true);
+        return financeRecordRepository.save(record);
     }
 }
